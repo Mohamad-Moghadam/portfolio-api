@@ -1,0 +1,8 @@
+# compiled binary
+/bin/
+# secrets — never commit these
+.env
+*.local
+# editors
+.idea/
+.vscode/
