@@ -138,3 +138,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 NEXTJS_REVALIDATE_URL = "http://localhost:3000/api/revalidate"
 NEXTJS_REVALIDATE_SECRET = "change-me-long-random-string"
+
+
+# Media files (user uploads)
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"

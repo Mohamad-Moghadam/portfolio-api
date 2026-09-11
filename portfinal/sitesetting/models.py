@@ -1,7 +1,6 @@
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.urls import reverse
 from django.utils import timezone
 from django.utils.text import slugify
 
@@ -23,6 +22,8 @@ class SiteSettings(models.Model):
     title = models.CharField(max_length=50)
     tagline = models.CharField(max_length=100, blank=True)
     description = models.TextField(blank=True)
+    role = models.CharField(max_length=100, blank=True)      # e.g. "Full-Stack Engineer"
+    location = models.CharField(max_length=100, blank=True)  # e.g. "Cairo, Egypt"
     favicon = models.ImageField(upload_to="favicons/", null=True, blank=True)
     logo = models.ImageField(upload_to="logos/", null=True, blank=True)
     email = models.EmailField(blank=True)
@@ -144,9 +145,6 @@ class Post(models.Model):
             self.published_at = timezone.now()
         super().save(*args, **kwargs)
 
-    def get_absolute_url(self):
-        return reverse("blog:post_detail", kwargs={"slug": self.slug})
-
 
 class Comment(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="comments")
@@ -246,6 +244,16 @@ class Skill(models.Model):
     )
     level = models.CharField(
         max_length=12, choices=Level.choices, default=Level.INTERMEDIATE
+    )
+    icon = models.CharField(
+        max_length=10,
+        blank=True,
+        help_text="Emoji shown on the frontend, e.g. 🌱",
+    )
+    color = models.CharField(
+        max_length=7,
+        blank=True,
+        help_text="Hex color for hover effects, e.g. #10b981",
     )
     order = models.PositiveSmallIntegerField(default=0)
 

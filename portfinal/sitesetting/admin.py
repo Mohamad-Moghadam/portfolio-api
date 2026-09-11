@@ -35,18 +35,16 @@ class ImageThumbnailMixin:
 @admin.register(SiteSettings)
 class SiteSettingsAdmin(admin.ModelAdmin):
     fieldsets = (
-        ("Branding", {"fields": ("title", "tagline", "description", "logo", "favicon")}),
+        ("Branding", {"fields": ("title", "tagline", "role", "location", "description", "logo", "favicon")}),
         ("Contact & Social", {"fields": ("email", "github_url", "linkedin_url", "twitter_url")}),
         ("Files", {"fields": ("resume",)}),
     )
 
     def has_add_permission(self, request):
-        # Singleton — only allow creating the very first row.
         return not SiteSettings.objects.exists()
 
     def has_delete_permission(self, request, obj=None):
         return False
-
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
@@ -160,11 +158,21 @@ class EducationAdmin(admin.ModelAdmin):
 
 @admin.register(Skill)
 class SkillAdmin(admin.ModelAdmin):
-    list_display = ["name", "category", "level", "order"]
+    list_display = ["name", "icon", "category", "level", "color_swatch", "order"]
     list_editable = ["order"]
     list_filter = ["category", "level"]
     search_fields = ["name"]
 
+    @admin.display(description="Color")
+    def color_swatch(self, obj):
+        if obj.color:
+            return format_html(
+                '<span style="display:inline-block;width:14px;height:14px;border-radius:3px;'
+                'background:{};border:1px solid rgba(255,255,255,0.3)"></span> <code>{}</code>',
+                obj.color,
+                obj.color,
+            )
+        return "—"
 
 @admin.register(Project)
 class ProjectAdmin(ImageThumbnailMixin, admin.ModelAdmin):

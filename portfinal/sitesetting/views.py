@@ -1,5 +1,6 @@
 from django.db.models import Prefetch
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from rest_framework import generics, viewsets
 from rest_framework.response import Response
 from rest_framework.throttling import AnonRateThrottle
@@ -61,7 +62,25 @@ class PostViewSet(viewsets.ReadOnlyModelViewSet):
 # One round trip per page instead of four — the frontend asks once, gets everything.
 class HomeAPIView(APIView):
     def get(self, request):
+        latest_edu = Education.objects.filter(is_visible=True).first()
+        earliest_job = (
+            Experience.objects.filter(is_visible=True).order_by("start_date").first()
+        )
+
+        experience = ""
+        if earliest_job:
+            years = timezone.now().year - earliest_job.start_date.year
+            if years > 0:
+                experience = f"{years}+ years"
+
         return Response({
+            "profile": {
+                "education": (
+                    f"{latest_edu.degree}, {latest_edu.institution}"
+                    if latest_edu else ""
+                ),
+                "experience": experience,
+            },
             "featured_projects": ProjectSerializer(
                 Project.objects.filter(is_visible=True, is_featured=True)
                 .prefetch_related("skills"),
@@ -80,7 +99,9 @@ class ResumeAPIView(APIView):
             "education": EducationSerializer(
                 Education.objects.filter(is_visible=True), many=True
             ).data,
-            "skills": SkillSerializer(Skill.objects.all(), many=True).data,
+            "skills": SkillSerializer(
+                Skill.objects.all(), many=True
+            ).data,
             "certifications": CertificationSerializer(
                 Certification.objects.all(), many=True
             ).data,

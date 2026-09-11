@@ -21,7 +21,7 @@ class CategorySerializer(serializers.ModelSerializer):
 class SkillSerializer(serializers.ModelSerializer):
     class Meta:
         model = Skill
-        fields = ["name", "category", "level"]
+        fields = ["name", "category", "level", "icon", "color"]
 
 
 class ProjectSerializer(serializers.ModelSerializer):
@@ -66,8 +66,9 @@ class SiteSettingsSerializer(serializers.ModelSerializer):
     class Meta:
         model = SiteSettings
         fields = [
-            "title", "tagline", "description", "favicon", "logo",
-            "email", "github_url", "linkedin_url", "twitter_url", "resume",
+            "title", "tagline", "description", "role", "location",
+            "favicon", "logo", "email",
+            "github_url", "linkedin_url", "twitter_url", "resume",
         ]
 
 
@@ -78,13 +79,17 @@ class PostListSerializer(serializers.ModelSerializer):
     category = CategorySerializer(read_only=True)
     tags = TagSerializer(many=True, read_only=True)
     author = serializers.StringRelatedField()
+    read_time = serializers.SerializerMethodField()
 
     class Meta:
         model = Post
         fields = [
             "title", "slug", "excerpt", "featured_image",
-            "category", "tags", "author", "published_at",
+            "category", "tags", "author", "published_at", "read_time",
         ]
+
+    def get_read_time(self, obj):
+        return max(1, round(len(obj.content.split()) / 200))
 
 
 class CommentPublicSerializer(serializers.ModelSerializer):
